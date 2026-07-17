@@ -119,7 +119,7 @@ export default function RestaurantPage() {
   const [viewers,       setViewers]          = useState(0)
   const [customizeItem, setCustomizeItem]   = useState(null)
   const categoryRefs = useRef({})
-  const isCustomer = user?.roles?.includes('ROLE_CUSTOMER')
+  const isOpenNow = (() => { const h = new Date().getHours(); return h >= 9 && h < 23 })()
 
   const getCartQty = (itemId) => cartItems
     .filter(i => i.id === itemId)
@@ -149,7 +149,6 @@ export default function RestaurantPage() {
   }
 
   const handleAdd = item => {
-    if (!(restaurant.open ?? restaurant.isOpen)) { toast.error('Restaurant is currently closed'); return }
     if (item.addons?.length > 0) { setCustomizeItem(item); return }
     dispatch(addItem({
       id: item.id, name: item.name, price: Number(item.price),
@@ -222,9 +221,9 @@ export default function RestaurantPage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold">{restaurant.name}</h1>
-              <span className={`badge text-xs font-semibold ${(restaurant.open ?? restaurant.isOpen)
+              <span className={`badge text-xs font-semibold ${(isOpenNow)
                 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                {(restaurant.open ?? restaurant.isOpen) ? '🟢 Open' : '🔴 Closed'}
+                {(isOpenNow) ? '🟢 Open' : '🔴 Closed'}
               </span>
               {viewers > 0 && (
                 <span className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full font-medium animate-pulse">
@@ -302,7 +301,7 @@ export default function RestaurantPage() {
       )}
 
       {/* Closed banner */}
-      {!(restaurant.open ?? restaurant.isOpen) && (
+      {!(isOpenNow) && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-red-700 text-sm">
           <FiAlertCircle size={16} />
           <span>This restaurant is currently closed.</span>

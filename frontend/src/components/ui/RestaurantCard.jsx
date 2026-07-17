@@ -6,8 +6,10 @@ export default function RestaurantCard({ restaurant }) {
           avgDeliveryTimeMinutes, deliveryFee, storeType, open, isOpen, minOrderAmount,
           isPromoted, recentOrderCount, openTime, createdAt } = restaurant
 
-  // API returns 'open', frontend state uses 'isOpen' — handle both
-  const isOpenNow = open ?? isOpen ?? true
+  // Check open status based on actual time (9AM-11PM) as fallback
+  const now = new Date()
+  const hour = now.getHours()
+  const isOpenNow = (open ?? isOpen ?? true) && hour >= 9 && hour < 23
 
   const storeIcon = { RESTAURANT: '🍽️', GROCERY: '🛒', PHARMACY: '💊' }[storeType] || '🍽️'
   const isNew = createdAt && (Date.now() - new Date(createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000
