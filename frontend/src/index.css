@@ -1,0 +1,44 @@
+/* Leaflet map styles - must be before @tailwind */
+@import 'leaflet/dist/leaflet.css';
+/* Devanagari font for Hindi & Marathi */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', 'Noto Sans Devanagari', ui-sans-serif, system-ui, sans-serif;
+    @apply bg-gray-50 text-gray-900 transition-colors duration-200;
+  }
+  .dark body, body.dark {
+    @apply bg-gray-950 text-gray-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg font-semibold
+           hover:bg-primary-dark transition-colors disabled:opacity-50 cursor-pointer;
+  }
+  .btn-outline {
+    @apply border border-primary text-primary px-4 py-2 rounded-lg font-semibold
+           hover:bg-primary hover:text-white transition-colors cursor-pointer;
+  }
+  .card {
+    @apply bg-white dark:bg-gray-800 dark:border-gray-700
+           rounded-xl shadow-sm border border-gray-100 p-4
+           transition-colors duration-200;
+  }
+  .input {
+    @apply w-full border border-gray-300 dark:border-gray-600
+           dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400
+           rounded-lg px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+           transition-colors duration-200;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}

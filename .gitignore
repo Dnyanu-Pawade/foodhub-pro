@@ -1,0 +1,33 @@
+# Maven
+backend/target/
+backend/logs/
+*.jar
+*.war
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Backend static (built frontend)
+backend/src/main/resources/static/assets/
+
+# Uploads
+uploads/
+backend/uploads/
+
+# Env / secrets
+.env
+backend/.env
+frontend/.env.local
+*.env.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.DS_Store
+
+# Logs
+*.log
+app.log
