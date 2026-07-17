@@ -115,6 +115,13 @@ public class RestaurantController {
 
     // ── Admin ────────────────────────────────────────────────────────────────
 
+    @GetMapping("/api/admin/restaurants/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all pending approval restaurants")
+    public ResponseEntity<List<RestaurantDto>> getPending() {
+        return ResponseEntity.ok(restaurantService.getPendingRestaurants());
+    }
+
     @PatchMapping("/api/admin/restaurants/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Approve restaurant")

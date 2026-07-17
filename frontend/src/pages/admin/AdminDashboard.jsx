@@ -13,7 +13,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     api.get('/admin/analytics/dashboard').then(r => setStats(r.data)).catch(() => {})
-    api.get('/restaurants?status=PENDING_APPROVAL&size=20').then(r => setPending(r.data.content || [])).catch(() => {})
+    api.get('/admin/restaurants/pending').then(r => setPending(r.data || [])).catch(() => {})
     api.get('/surge/status').then(r => setSurge(r.data)).catch(() => {})
   }, [])
 

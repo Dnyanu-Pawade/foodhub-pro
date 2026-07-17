@@ -5,7 +5,8 @@ import { FiUpload } from 'react-icons/fi'
 
 const EMPTY = { name: '', description: '', cuisineType: '', address: '', city: '', pincode: '',
                 phone: '', email: '', deliveryFee: 0, minOrderAmount: 0, avgDeliveryTimeMinutes: 30,
-                storeType: 'RESTAURANT', logoUrl: '', bannerUrl: '' }
+                storeType: 'RESTAURANT', logoUrl: '', bannerUrl: '',
+                openTime: '09:00', closeTime: '23:00' }
 
 async function uploadImage(file, type) {
   const fd = new FormData()
@@ -135,6 +136,16 @@ export default function OwnerRestaurantPage() {
                 <input className="input" placeholder="Delivery fee" type="number" value={form.deliveryFee} onChange={set('deliveryFee')} />
                 <input className="input" placeholder="Min order" type="number" value={form.minOrderAmount} onChange={set('minOrderAmount')} />
                 <input className="input" placeholder="Delivery mins" type="number" value={form.avgDeliveryTimeMinutes} onChange={set('avgDeliveryTimeMinutes')} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Opening Time</label>
+                  <input type="time" className="input" value={form.openTime || '09:00'} onChange={set('openTime')} />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Closing Time</label>
+                  <input type="time" className="input" value={form.closeTime || '23:00'} onChange={set('closeTime')} />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Logo</label>

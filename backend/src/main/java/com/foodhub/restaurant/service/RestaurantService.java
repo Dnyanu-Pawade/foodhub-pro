@@ -69,6 +69,9 @@ public class RestaurantService {
         Restaurant r = toEntity(dto);
         r.setOwner(owner);
         r.setStatus(RestaurantStatus.PENDING_APPROVAL);
+        // Default open hours 9AM-11PM if not set
+        if (r.getOpenTime() == null)  r.setOpenTime(java.time.LocalTime.of(9, 0));
+        if (r.getCloseTime() == null) r.setCloseTime(java.time.LocalTime.of(23, 0));
         return toDto(restaurantRepository.save(r));
     }
 
@@ -109,6 +112,12 @@ public class RestaurantService {
         r.setPromoted(true);
         r.setPromotedUntil(LocalDateTime.now().plusDays(days));
         return toDto(restaurantRepository.save(r));
+    }
+
+    @Transactional(readOnly = true)
+    public List<RestaurantDto> getPendingRestaurants() {
+        return restaurantRepository.findByStatusAndDeletedAtIsNull(RestaurantStatus.PENDING_APPROVAL)
+                .stream().map(this::toDto).toList();
     }
 
     @Transactional

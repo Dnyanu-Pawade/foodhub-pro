@@ -61,6 +61,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     List<Restaurant> findByOwnerIdAndDeletedAtIsNull(Long ownerId);
 
+    List<Restaurant> findByStatusAndDeletedAtIsNull(RestaurantStatus status);
+
     Optional<Restaurant> findByIdAndDeletedAtIsNull(Long id);
 
     @Query("SELECT DISTINCT r.city FROM Restaurant r WHERE r.status = 'APPROVED' AND r.isActive = true AND r.city IS NOT NULL ORDER BY r.city")
