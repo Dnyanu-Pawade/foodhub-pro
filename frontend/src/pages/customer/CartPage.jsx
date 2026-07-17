@@ -44,6 +44,8 @@ export default function CartPage() {
   const [groupCode, setGroupCode]           = useState(null)
   const [groupLoading, setGroupLoading]     = useState(false)
   const [zoneWarning, setZoneWarning]       = useState(null)
+  const [scheduleAt,   setScheduleAt]       = useState('')
+  const [showSchedule, setShowSchedule]     = useState(false)
 
   useEffect(() => {
     api.get('/surge/status').then(r => { if (r.data.active) setSurge(r.data) }).catch(() => {})
@@ -162,6 +164,7 @@ export default function CartPage() {
       tip,
       deliveryLat: gpsCoords?.lat || null,
       deliveryLng: gpsCoords?.lng || null,
+      scheduledAt: scheduleAt || null,
     }))
 
     if (result.error) return
@@ -368,6 +371,32 @@ export default function CartPage() {
         )}
       </div>
 
+      {/* Schedule Order */}
+      <div className="card mb-4">
+        <div className="flex items-center justify-between">
+          <p className="font-medium">⏰ Schedule Order</p>
+          <button onClick={() => { setShowSchedule(s => !s); if (showSchedule) setScheduleAt('') }}
+                  className={`text-sm px-3 py-1 rounded-full border transition-colors
+                    ${showSchedule ? 'bg-primary text-white border-primary' : 'border-gray-300 text-gray-600 hover:border-primary'}`}>
+            {showSchedule ? 'Cancel' : 'Schedule'}
+          </button>
+        </div>
+        {showSchedule && (
+          <div className="mt-3">
+            <p className="text-xs text-gray-500 mb-2">Order will be placed automatically at the selected time</p>
+            <input type="datetime-local" className="input"
+                   min={new Date(Date.now() + 30 * 60000).toISOString().slice(0, 16)}
+                   max={new Date(Date.now() + 7 * 24 * 60 * 60000).toISOString().slice(0, 16)}
+                   value={scheduleAt} onChange={e => setScheduleAt(e.target.value)} />
+            {scheduleAt && (
+              <p className="text-xs text-green-600 mt-1.5 font-medium">
+                ✅ Scheduled for {new Date(scheduleAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Payment method */}
       <div className="card mb-6">
         <p className="font-medium mb-2">{t('payment_method')}</p>
@@ -479,7 +508,7 @@ export default function CartPage() {
       </div>
 
       <button onClick={handleCheckout} disabled={loading} className="btn-primary w-full text-base py-3">
-        {loading ? t('placing_order') : `${t('place_order')} • ₹${total.toFixed(2)}`}
+        {loading ? t('placing_order') : scheduleAt ? `⏰ Schedule Order • ₹${total.toFixed(2)}` : `${t('place_order')} • ₹${total.toFixed(2)}`}
       </button>
     </div>
   )

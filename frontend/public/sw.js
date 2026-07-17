@@ -1,5 +1,5 @@
-const CACHE = 'foodhub-v4'
-const STATIC = ['/index.html', '/manifest.json']
+const CACHE = 'foodhub-v5'
+const STATIC = ['/index.html', '/manifest.json', '/offline.html']
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -35,7 +35,9 @@ self.addEventListener('fetch', e => {
       }).catch(() => cached || new Response('Offline', { status: 503, statusText: 'Service Unavailable' }))
 
       return cached || networkFetch
-    })
+    }).catch(() =>
+      caches.match('/offline.html').then(r => r || new Response('Offline', { status: 503 }))
+    )
   )
 })
 

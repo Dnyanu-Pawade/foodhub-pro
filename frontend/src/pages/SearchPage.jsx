@@ -19,6 +19,13 @@ const FILTERS = [
   { key: 'top_rated', label: '⭐ Rating 4.0+' },
   { key: 'fast',      label: '⚡ Under 30 min' },
   { key: 'free_del',  label: '🚚 Free Delivery' },
+  { key: 'open',      label: '🟩 Open Now' },
+]
+
+const CUISINE_FILTERS = [
+  '🍕 Pizza','🍔 Burger','🍱 Biryani','🍜 Chinese',
+  '🥗 Healthy','🌮 Snacks','🍦 Desserts','☕ Cafe',
+  '🍛 North Indian','🥘 South Indian','🍣 Sushi','🥙 Wraps',
 ]
 
 export default function SearchPage() {
@@ -33,6 +40,7 @@ export default function SearchPage() {
   )
   const [sortBy,        setSortBy]        = useState('relevance')
   const [activeFilters, setActiveFilters] = useState(new Set())
+  const [cuisineFilter, setCuisineFilter] = useState('')
   const [showFilters,   setShowFilters]   = useState(false)
   const inputRef    = useRef(null)
   const debounceRef = useRef(null)
@@ -93,6 +101,8 @@ export default function SearchPage() {
     if (activeFilters.has('top_rated')) out = out.filter(r => (r.avgRating || 0) >= 4.0)
     if (activeFilters.has('fast'))      out = out.filter(r => (r.avgDeliveryTimeMinutes || 99) <= 30)
     if (activeFilters.has('free_del'))  out = out.filter(r => r.deliveryFee === 0)
+    if (activeFilters.has('open'))      out = out.filter(r => r.isOpen)
+    if (cuisineFilter) out = out.filter(r => r.cuisineType?.toLowerCase().includes(cuisineFilter.toLowerCase().replace(/^\S+\s/, '')))
     if (sortBy === 'rating')   out.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0))
     if (sortBy === 'delivery') out.sort((a, b) => (a.avgDeliveryTimeMinutes || 99) - (b.avgDeliveryTimeMinutes || 99))
     if (sortBy === 'cost_low') out.sort((a, b) => (a.minOrderAmount || 0) - (b.minOrderAmount || 0))
@@ -159,6 +169,23 @@ export default function SearchPage() {
                         className={`px-3 py-1.5 rounded-full text-sm border transition-colors
                           ${activeFilters.has(f.key) ? 'bg-primary text-white border-primary' : 'border-gray-200 dark:border-gray-600 dark:text-gray-300'}`}>
                   {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">CUISINE</p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => setCuisineFilter('')}
+                      className={`px-3 py-1.5 rounded-full text-sm border transition-colors
+                        ${!cuisineFilter ? 'bg-primary text-white border-primary' : 'border-gray-200 dark:border-gray-600 dark:text-gray-300'}`}>
+                All
+              </button>
+              {CUISINE_FILTERS.map(c => (
+                <button key={c} onClick={() => setCuisineFilter(cuisineFilter === c ? '' : c)}
+                        className={`px-3 py-1.5 rounded-full text-sm border transition-colors
+                          ${cuisineFilter === c ? 'bg-primary text-white border-primary' : 'border-gray-200 dark:border-gray-600 dark:text-gray-300'}`}>
+                  {c}
                 </button>
               ))}
             </div>

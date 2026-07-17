@@ -103,6 +103,13 @@ public class OrderService {
         order.setPaymentStatus("PENDING");
         order.setSpecialInstructions(request.getSpecialInstructions());
         order.setTableNumber(request.getTableNumber());
+        if (request.getScheduledAt() != null && !request.getScheduledAt().isBlank()) {
+            try {
+                order.setScheduledAt(java.time.LocalDateTime.parse(
+                    request.getScheduledAt().replace("T", "T").substring(0, 16),
+                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
+            } catch (Exception ignored) {}
+        }
 
         BigDecimal subtotal = BigDecimal.ZERO;
         for (OrderRequest.OrderItemRequest itemReq : request.getItems()) {

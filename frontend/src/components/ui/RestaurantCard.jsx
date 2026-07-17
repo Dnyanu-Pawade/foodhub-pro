@@ -107,13 +107,19 @@ export default function RestaurantCard({ restaurant }) {
 
         {/* Stats row */}
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-2 mt-1">
-          <span className="flex items-center gap-0.5">
-            <FiClock size={11} /> {avgDeliveryTimeMinutes} min
+          <span className={`flex items-center gap-0.5 font-medium ${
+            avgDeliveryTimeMinutes <= 20 ? 'text-green-600' :
+            avgDeliveryTimeMinutes <= 35 ? 'text-orange-500' : 'text-gray-500'
+          }`}>
+            <FiClock size={11} />
+            {avgDeliveryTimeMinutes <= 20 ? `${avgDeliveryTimeMinutes} min ⚡` :
+             avgDeliveryTimeMinutes <= 35 ? `${avgDeliveryTimeMinutes} min` :
+             `${avgDeliveryTimeMinutes} min`}
           </span>
           <span className="text-gray-300 dark:text-gray-600">•</span>
           <span className="flex items-center gap-0.5">
             <FiTruck size={11} />
-            {deliveryFee === 0 ? 'Free' : `₹${deliveryFee}`}
+            {deliveryFee === 0 ? <span className="text-green-600 font-medium">Free</span> : `₹${deliveryFee}`}
           </span>
           {minOrderAmount > 0 && (
             <>

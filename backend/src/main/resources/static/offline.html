@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodHub Pro — Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #fff7ed;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+      max-width: 400px;
+      width: 100%;
+    }
+    .emoji { font-size: 72px; margin-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 800; color: #1f2937; margin-bottom: 8px; }
+    p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+    .btn {
+      display: inline-block;
+      background: #f97316;
+      color: white;
+      padding: 12px 32px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #ea6c0a; }
+    .tip {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">🍽️</div>
+    <h1>You're Offline</h1>
+    <p>No internet connection detected. Please check your network and try again.</p>
+    <button class="btn" onclick="window.location.reload()">🔄 Try Again</button>
+    <p class="tip">Previously visited pages may still be available.</p>
+  </div>
+</body>
+</html>
