@@ -95,12 +95,12 @@ export default function App() {
 
   useEffect(() => {
     if (!user || !accessToken) return
+    dispatch(fetchNotifications())
     if (user.roles?.includes('ROLE_CUSTOMER')) {
       dispatch(fetchWallet())
       dispatch(fetchLoyalty())
     }
-    dispatch(fetchNotifications())
-  }, [user?.id, accessToken])
+  }, [user?.id])
 
   return (
     <ErrorBoundary>

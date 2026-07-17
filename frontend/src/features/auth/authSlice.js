@@ -2,13 +2,19 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
-// Validate saved auth — clear if tokens missing to avoid stale state
+// On every page load: validate saved session — wipe if token expired or missing
 const raw = localStorage.getItem('auth')
 let saved = null
 try {
   const parsed = JSON.parse(raw || 'null')
-  if (parsed?.accessToken && parsed?.refreshToken) saved = parsed
-  else if (raw) localStorage.removeItem('auth')
+  if (parsed?.accessToken && parsed?.refreshToken) {
+    const parts = parsed.accessToken.split('.')
+    if (parts.length === 3) {
+      const exp = JSON.parse(atob(parts[1])).exp
+      if (exp * 1000 > Date.now()) saved = parsed
+      else localStorage.removeItem('auth')   // expired — force re-login
+    } else localStorage.removeItem('auth')
+  } else localStorage.removeItem('auth')
 } catch { localStorage.removeItem('auth') }
 
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
