@@ -2,7 +2,14 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
-// On every page load: validate saved session — wipe if token expired or missing
+// Clear stale auth if app version changed (new JAR = new DB = old refresh tokens invalid)
+const APP_VERSION = '1.0.5'
+if (localStorage.getItem('app_version') !== APP_VERSION) {
+  localStorage.removeItem('auth')
+  localStorage.setItem('app_version', APP_VERSION)
+}
+
+// Validate saved session
 const raw = localStorage.getItem('auth')
 let saved = null
 try {
