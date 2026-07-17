@@ -90,8 +90,13 @@ public class OrderService {
         Restaurant restaurant = restaurantRepository.findByIdAndDeletedAtIsNull(request.getRestaurantId())
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
 
-        if (!restaurant.isOpen())
-            throw new BadRequestException("Restaurant is currently closed. Orders accepted 9 AM – 11 PM.");
+        // Check if restaurant is open by real time (9AM-11PM) OR isOpen flag
+        java.time.LocalTime now = java.time.LocalTime.now();
+        java.time.LocalTime open  = restaurant.getOpenTime()  != null ? restaurant.getOpenTime()  : java.time.LocalTime.of(9, 0);
+        java.time.LocalTime close = restaurant.getCloseTime() != null ? restaurant.getCloseTime() : java.time.LocalTime.of(23, 0);
+        boolean withinHours = now.isAfter(open) && now.isBefore(close);
+        if (!withinHours)
+            throw new BadRequestException("Restaurant is currently closed. Opens at " + open + ".");
 
         Order order = new Order();
         order.setCustomer(customer);

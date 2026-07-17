@@ -17,15 +17,19 @@ import java.util.Optional;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
-    // Open restaurants where current time is within their open hours
+    // Open or close all approved active restaurants
+    @Modifying
+    @Query("UPDATE Restaurant r SET r.isOpen = :open WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL")
+    int setAllOpen(@Param("open") boolean open);
+
+    // Keep old methods for compatibility but they won't be called
     @Modifying
     @Query("UPDATE Restaurant r SET r.isOpen = true WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL AND r.openTime IS NOT NULL AND r.closeTime IS NOT NULL AND r.openTime <= :now AND r.closeTime > :now AND r.isOpen = false")
-    int openByTime(@Param("now") LocalTime now);
+    int openByTime(@Param("now") java.time.LocalTime now);
 
-    // Close restaurants where current time is outside their open hours
     @Modifying
     @Query("UPDATE Restaurant r SET r.isOpen = false WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL AND r.openTime IS NOT NULL AND r.closeTime IS NOT NULL AND (r.closeTime <= :now OR r.openTime > :now) AND r.isOpen = true")
-    int closeByTime(@Param("now") LocalTime now);
+    int closeByTime(@Param("now") java.time.LocalTime now);
 
     Page<Restaurant> findByStatusAndIsActiveTrue(RestaurantStatus status, Pageable pageable);
     long countByStatus(RestaurantStatus status);
