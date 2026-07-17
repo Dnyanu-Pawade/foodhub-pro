@@ -9,10 +9,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.jpa.repository.Modifying;
+
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
+
+    // Bulk open: all restaurants whose openTime <= now <= closeTime
+    @Modifying
+    @Query("UPDATE Restaurant r SET r.isOpen = true WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL AND r.openTime <= :now AND r.closeTime > :now")
+    int openByTime(@Param("now") LocalTime now);
+
+    // Bulk close: all restaurants whose closeTime <= now OR openTime > now
+    @Modifying
+    @Query("UPDATE Restaurant r SET r.isOpen = false WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL AND (r.closeTime <= :now OR r.openTime > :now)")
+    int closeByTime(@Param("now") LocalTime now);
 
     Page<Restaurant> findByStatusAndIsActiveTrue(RestaurantStatus status, Pageable pageable);
     long countByStatus(RestaurantStatus status);

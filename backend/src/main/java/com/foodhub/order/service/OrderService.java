@@ -90,6 +90,9 @@ public class OrderService {
         Restaurant restaurant = restaurantRepository.findByIdAndDeletedAtIsNull(request.getRestaurantId())
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
 
+        if (!restaurant.isOpen())
+            throw new BadRequestException("Restaurant is currently closed. Orders accepted 9 AM – 11 PM.");
+
         Order order = new Order();
         order.setCustomer(customer);
         order.setRestaurant(restaurant);
