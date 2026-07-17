@@ -15,8 +15,8 @@ export default function FloatingCart() {
   if (count === 0 || location.pathname === '/cart') return null
 
   return (
-    // hidden on mobile (BottomNav handles cart), visible on md+
-    <div className="hidden md:block fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+    // Show on both mobile and desktop — above bottom nav on mobile
+    <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
       <button onClick={() => navigate('/cart')}
               className="w-full bg-primary text-white rounded-2xl px-5 py-3.5 flex items-center justify-between shadow-2xl shadow-primary/30 hover:bg-orange-600 active:scale-95 transition-all">
         <div className="flex items-center gap-3">

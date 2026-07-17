@@ -66,10 +66,13 @@ export default function OrderSuccessPage() {
       <div className={`card max-w-md w-full text-center transition-all duration-700
         ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <div className="text-7xl mb-4 animate-bounce">🎉</div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Order Placed!</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Order Placed! 🎉</h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-2">
           Your order #{orderId} has been placed successfully.
         </p>
+        <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+          🚕 Estimated delivery: {order?.avgDeliveryTimeMinutes || 30}-{(order?.avgDeliveryTimeMinutes || 30) + 10} mins
+        </div>
 
         {order && (
           <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6 text-left space-y-2 text-sm">
