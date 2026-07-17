@@ -49,7 +49,6 @@ public class RestaurantService {
                 minRating, openNow, sortBy, pageable).map(this::toDto);
     }
 
-    @Cacheable(value = "restaurant", key = "#id")
     @Transactional(readOnly = true)
     public RestaurantDto getById(Long id) {
         return toDto(restaurantRepository.findByIdAndDeletedAtIsNull(id)

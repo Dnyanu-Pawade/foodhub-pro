@@ -3,6 +3,7 @@ package com.foodhub.restaurant.service;
 import com.foodhub.restaurant.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class RestaurantScheduler {
     // Runs every minute — opens restaurants whose openTime has arrived
     @Scheduled(cron = "0 * * * * *")
     @Transactional
+    @CacheEvict(value = {"restaurant", "cities"}, allEntries = true)
     public void syncOpenClose() {
         LocalTime now = LocalTime.now();
         int opened = restaurantRepository.openByTime(now);
