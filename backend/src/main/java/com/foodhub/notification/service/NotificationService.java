@@ -75,7 +75,7 @@ public class NotificationService {
         sendWhatsApp(phone,
             emoji + " *FoodHub Pro* — Order Update\n\n" +
             "Hi " + customerName + "! Your order *#" + orderId + "* is now " + msg + "\n\n" +
-            "Track: http://localhost:8082/orders/" + orderId);
+            "Track your order on FoodHub Pro 🍽️");
     }
 
     // WhatsApp via Twilio (same API, different prefix)
@@ -105,7 +105,6 @@ public class NotificationService {
             "🍽️ *FoodHub Pro* — Order Confirmed!\n\n" +
             "Hi " + customerName + "! Your order *#" + orderId + "* from *" + restaurantName +
             "* (₹" + total + ") has been placed.\n\n" +
-            "Track your order: http://localhost:8082/orders/" + orderId + "\n\n" +
             "Thank you for ordering! 🙏");
     }
 }

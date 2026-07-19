@@ -16,7 +16,11 @@ public class SpaController {
         "/invoice", "/scheduled-orders", "/gift-cards",
         "/terms", "/privacy", "/landing",
         "/qr-order", "/order",
-        "/owner/onboarding"
+        "/owner/onboarding",
+        "/forgot-password", "/explore",
+        "/table-booking", "/chat/**",
+        "/group-order", "/group-order/**",
+        "/order-success"
     })
     public String forward() {
         return "forward:/index.html";
