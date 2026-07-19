@@ -39,6 +39,7 @@ import OwnerPayoutPage     from '@/pages/owner/OwnerPayoutPage'
 
 import DeliveryDashboard from '@/pages/delivery/DeliveryDashboard'
 import DeliveryKycPage   from '@/pages/delivery/DeliveryKycPage'
+import DeliveryPayoutPage from '@/pages/delivery/DeliveryPayoutPage'
 
 import AdminDashboard      from '@/pages/admin/AdminDashboard'
 import AdminAnalyticsPage  from '@/pages/admin/AdminAnalyticsPage'
@@ -163,6 +164,7 @@ export default function App() {
         {/* Delivery */}
         <Route path="/delivery/dashboard" element={PR(['ROLE_DELIVERY_PARTNER'], DeliveryDashboard)} />
         <Route path="/delivery/kyc"       element={PR(['ROLE_DELIVERY_PARTNER'], DeliveryKycPage)} />
+        <Route path="/delivery/payouts"   element={PR(['ROLE_DELIVERY_PARTNER'], DeliveryPayoutPage)} />
 
         {/* Admin */}
         <Route path="/admin"             element={PR(['ROLE_ADMIN'], AdminDashboard)} />

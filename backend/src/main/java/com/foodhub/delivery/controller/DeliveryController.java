@@ -1,6 +1,7 @@
 package com.foodhub.delivery.controller;
 
 import com.foodhub.auth.security.UserDetailsImpl;
+import com.foodhub.auth.repository.UserRepository;
 import com.foodhub.common.exception.ResourceNotFoundException;
 import com.foodhub.common.service.S3UploadService;
 import com.foodhub.delivery.dto.DeliveryDto;
@@ -8,6 +9,7 @@ import com.foodhub.delivery.dto.LocationUpdate;
 import com.foodhub.delivery.entity.Delivery;
 import com.foodhub.delivery.repository.DeliveryRepository;
 import com.foodhub.delivery.service.DeliveryService;
+import com.foodhub.payout.repository.DeliveryPayoutRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,8 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
     private final SimpMessagingTemplate messagingTemplate;
     private final S3UploadService s3UploadService;
+    private final DeliveryPayoutRepository deliveryPayoutRepository;
+    private final com.foodhub.auth.repository.UserRepository userRepository;
 
     @GetMapping("/api/delivery/available")
     @PreAuthorize("hasRole('DELIVERY_PARTNER')")
@@ -104,5 +108,42 @@ public class DeliveryController {
         delivery.setDeliveryPhotoUrl(url);
         deliveryRepository.save(delivery);
         return ResponseEntity.ok(Map.of("url", url));
+    }
+
+    // ── Delivery Partner Payouts ──────────────────────────────────────────
+
+    @GetMapping("/api/delivery/payouts")
+    @PreAuthorize("hasRole('DELIVERY_PARTNER')")
+    public ResponseEntity<List<com.foodhub.payout.entity.DeliveryPayoutRequest>> getMyPayouts(
+            @AuthenticationPrincipal UserDetailsImpl user) {
+        return ResponseEntity.ok(
+            deliveryPayoutRepository.findByPartnerIdOrderByCreatedAtDesc(user.getId()));
+    }
+
+    @PostMapping("/api/delivery/payouts/request")
+    @PreAuthorize("hasRole('DELIVERY_PARTNER')")
+    public ResponseEntity<com.foodhub.payout.entity.DeliveryPayoutRequest> requestPayout(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetailsImpl user) {
+        Map<String, Object> earnings = deliveryService.getEarnings(user.getId());
+        java.math.BigDecimal totalEarned = new java.math.BigDecimal(earnings.get("totalEarnings").toString());
+        java.math.BigDecimal alreadyPaid = deliveryPayoutRepository
+                .findByPartnerIdOrderByCreatedAtDesc(user.getId()).stream()
+                .filter(p -> p.getStatus() == com.foodhub.payout.entity.DeliveryPayoutRequest.PayoutStatus.COMPLETED)
+                .map(p -> p.getAmount())
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        java.math.BigDecimal pending = totalEarned.subtract(alreadyPaid);
+        if (pending.compareTo(java.math.BigDecimal.valueOf(100)) < 0)
+            throw new com.foodhub.common.exception.BadRequestException("Minimum payout is ₹100");
+        com.foodhub.auth.entity.User partner = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        com.foodhub.payout.entity.DeliveryPayoutRequest req = new com.foodhub.payout.entity.DeliveryPayoutRequest();
+        req.setPartner(partner);
+        req.setAmount(pending);
+        req.setBankAccount(body.get("bankAccount"));
+        req.setIfscCode(body.get("ifscCode"));
+        req.setAccountHolderName(body.get("accountHolderName"));
+        req.setUpiId(body.get("upiId"));
+        return ResponseEntity.ok(deliveryPayoutRepository.save(req));
     }
 }

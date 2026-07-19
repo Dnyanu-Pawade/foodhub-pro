@@ -145,6 +145,7 @@ export default function Navbar() {
     { group: 'Delivery', items: [
       { to: '/delivery/dashboard', icon: <FiTruck size={16}/>,    label: 'Dashboard' },
       { to: '/delivery/kyc',       icon: <FiFileText size={16}/>, label: 'KYC Documents' },
+      { to: '/delivery/payouts',   icon: <FiDollarSign size={16}/>, label: 'Earnings & Payouts' },
       { to: '/notifications',      icon: <FiBell size={16}/>,     label: 'Notifications' },
       { to: '/profile',            icon: <FiUser size={16}/>,     label: 'Profile' },
     ]},

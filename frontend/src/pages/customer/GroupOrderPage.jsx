@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { addItem, clearCart } from '@/features/cart/cartSlice'
 import api from '@/services/api'
 import toast from 'react-hot-toast'
 import { FiUsers, FiCopy, FiShoppingCart, FiPlus, FiMinus } from 'react-icons/fi'
+import { Client } from '@stomp/stompjs'
+import SockJS from 'sockjs-client'
 
 export default function GroupOrderPage() {
   const { code }   = useParams()
@@ -16,6 +18,7 @@ export default function GroupOrderPage() {
   const [menu,      setMenu]      = useState([])
   const [loading,   setLoading]   = useState(true)
   const [myItems,   setMyItems]   = useState([]) // items added by this user in this session
+  const stompRef = useRef(null)
 
   useEffect(() => {
     if (!code) return
@@ -27,6 +30,23 @@ export default function GroupOrderPage() {
       .then(r => setMenu(r.data))
       .catch(() => toast.error('Group cart not found or expired'))
       .finally(() => setLoading(false))
+  }, [code])
+
+  // Real-time sync via WebSocket
+  useEffect(() => {
+    if (!code) return
+    const client = new Client({
+      webSocketFactory: () => new SockJS('/ws'),
+      onConnect: () => {
+        client.subscribe(`/topic/group-cart/${code}`, msg => {
+          const updated = JSON.parse(msg.body)
+          setGroupCart(updated)
+        })
+      },
+    })
+    client.activate()
+    stompRef.current = client
+    return () => client.deactivate()
   }, [code])
 
   const getQty = (itemId) => myItems.find(i => i.id === itemId)?.quantity || 0

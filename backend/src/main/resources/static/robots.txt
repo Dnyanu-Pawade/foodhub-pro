@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /owner/
+Disallow: /delivery/
+Disallow: /cart
+Disallow: /orders
+Disallow: /wallet
+Disallow: /profile
+
+Sitemap: https://foodhubpro.in/sitemap.xml

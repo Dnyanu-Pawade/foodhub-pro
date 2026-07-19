@@ -3,20 +3,47 @@ import api from '@/services/api'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
+function CancelConfirmModal({ order, onClose, onConfirm }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="text-center mb-4">
+          <span className="text-4xl">⏰</span>
+          <h2 className="font-bold text-lg mt-2 dark:text-white">Cancel Scheduled Order?</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {order.restaurantName} — scheduled for{' '}
+            {new Date(order.scheduledAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onClose} className="btn-outline flex-1">Keep It</button>
+          <button onClick={onConfirm}
+                  className="flex-1 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition">
+            Yes, Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ScheduledOrdersPage() {
-  const [orders, setOrders]   = useState([])
-  const [loading, setLoading] = useState(true)
+  const [orders,      setOrders]      = useState([])
+  const [loading,     setLoading]     = useState(true)
+  const [cancelTarget, setCancelTarget] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
     api.get('/orders/scheduled').then(r => setOrders(r.data)).catch(() => setOrders([])).finally(() => setLoading(false))
   }, [])
 
-  const cancel = async (id) => {
-    if (!confirm('Cancel this scheduled order?')) return
-    await api.delete(`/orders/scheduled/${id}`)
-    setOrders(o => o.filter(x => x.id !== id))
-    toast.success('Scheduled order cancelled')
+  const cancel = async () => {
+    try {
+      await api.delete(`/orders/scheduled/${cancelTarget.id}`)
+      setOrders(o => o.filter(x => x.id !== cancelTarget.id))
+      toast.success('Scheduled order cancelled')
+    } catch { toast.error('Failed to cancel') }
+    finally { setCancelTarget(null) }
   }
 
   if (loading) return <div className="text-center py-16 text-gray-400">Loading...</div>
@@ -58,11 +85,18 @@ export default function ScheduledOrdersPage() {
                   <span>📅</span>
                   <span>{new Date(o.scheduledAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</span>
                 </div>
-                <button onClick={() => cancel(o.id)} className="text-sm text-red-500 hover:text-red-700">Cancel</button>
+                <button onClick={() => setCancelTarget(o)} className="text-sm text-red-500 hover:text-red-700">Cancel</button>
               </div>
             </div>
           ))}
         </div>
+      )}
+      {cancelTarget && (
+        <CancelConfirmModal
+          order={cancelTarget}
+          onClose={() => setCancelTarget(null)}
+          onConfirm={cancel}
+        />
       )}
     </div>
   )

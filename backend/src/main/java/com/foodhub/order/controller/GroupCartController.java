@@ -6,6 +6,7 @@ import com.foodhub.order.entity.GroupCart;
 import com.foodhub.order.repository.GroupCartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import java.util.Random;
 public class GroupCartController {
 
     private final GroupCartRepository groupCartRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     private static final String CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -57,7 +59,10 @@ public class GroupCartController {
         GroupCart gc = groupCartRepository.findByCodeAndActiveTrue(code)
                 .orElseThrow(() -> new ResourceNotFoundException("Group cart not found"));
         gc.setItemsJson(body.get("itemsJson"));
-        return ResponseEntity.ok(groupCartRepository.save(gc));
+        GroupCart saved = groupCartRepository.save(gc);
+        // Broadcast update to all members watching this group cart
+        messagingTemplate.convertAndSend("/topic/group-cart/" + code, saved);
+        return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{code}")

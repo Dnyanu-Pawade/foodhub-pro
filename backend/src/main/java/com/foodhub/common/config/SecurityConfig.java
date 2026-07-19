@@ -60,7 +60,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Static frontend files
                 .requestMatchers("/", "/index.html", "/assets/**", "/favicon.svg",
-                                 "/manifest.json", "/sw.js").permitAll()
+                                 "/manifest.json", "/sw.js", "/robots.txt").permitAll()
                 // React Router
                 .requestMatchers("/login", "/register", "/forgot-password", "/search", "/restaurant/**", "/cart",
                                  "/orders/**", "/wallet", "/favorites", "/profile",
