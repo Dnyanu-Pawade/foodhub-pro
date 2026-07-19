@@ -73,8 +73,14 @@ public class DeliveryService {
         return deliveryRepository.findByPartnerId(partnerId).stream().map(this::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<DeliveryDto> getAvailableDeliveries() {
-        return orderRepository.findByStatus(OrderStatus.READY_FOR_PICKUP).stream()
+        // Show PLACED, CONFIRMED, PREPARING, READY_FOR_PICKUP orders that have no delivery assigned
+        List<OrderStatus> pickable = List.of(
+            OrderStatus.PLACED, OrderStatus.CONFIRMED,
+            OrderStatus.PREPARING, OrderStatus.READY_FOR_PICKUP
+        );
+        return orderRepository.findByStatusIn(pickable).stream()
                 .filter(o -> deliveryRepository.findByOrderId(o.getId()).isEmpty())
                 .map(o -> {
                     DeliveryDto dto = new DeliveryDto();
@@ -82,15 +88,34 @@ public class DeliveryService {
                     dto.setRestaurantName(o.getRestaurant().getName());
                     dto.setRestaurantAddress(o.getRestaurant().getAddress());
                     dto.setDeliveryAddress(o.getDeliveryAddress());
+                    dto.setDeliveryLat(o.getDeliveryLat());
+                    dto.setDeliveryLng(o.getDeliveryLng());
                     dto.setTotalAmount(o.getTotalAmount());
+                    dto.setStatus(o.getStatus().name());
                     return dto;
                 }).toList();
     }
 
-    // Partner self-assigns an available delivery
+    // Partner self-assigns — also advances order to CONFIRMED so customer sees progress
     @Transactional
     public DeliveryDto acceptDelivery(Long orderId, Long partnerId) {
-        return assignPartner(orderId, partnerId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (deliveryRepository.findByOrderId(orderId).isPresent())
+            throw new BadRequestException("Already taken by another partner");
+        User partner = userRepository.findById(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner not found"));
+        // Auto-advance order status so customer sees it moving
+        if (order.getStatus() == OrderStatus.PLACED)
+            order.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+        Delivery delivery = new Delivery();
+        delivery.setOrder(order);
+        delivery.setPartner(partner);
+        delivery.setStatus(Delivery.DeliveryStatus.ASSIGNED);
+        DeliveryDto dto = toDto(deliveryRepository.save(delivery));
+        messagingTemplate.convertAndSend("/topic/order/" + orderId + "/status", order.getStatus());
+        return dto;
     }
 
     public Map<String, Object> getEarnings(Long partnerId) {
@@ -135,6 +160,8 @@ public class DeliveryService {
         dto.setRestaurantName(d.getOrder().getRestaurant().getName());
         dto.setRestaurantAddress(d.getOrder().getRestaurant().getAddress());
         dto.setDeliveryAddress(d.getOrder().getDeliveryAddress());
+        dto.setDeliveryLat(d.getOrder().getDeliveryLat());
+        dto.setDeliveryLng(d.getOrder().getDeliveryLng());
         dto.setTotalAmount(d.getOrder().getTotalAmount());
         return dto;
     }

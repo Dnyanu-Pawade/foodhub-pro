@@ -1,10 +1,8 @@
-const CACHE = 'foodhub-v5'
-const STATIC = ['/index.html', '/manifest.json', '/offline.html']
+const CACHE = 'foodhub-v7'
+const STATIC = ['/offline.html', '/manifest.json', '/favicon.svg']
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(STATIC)).catch(() => {})
-  )
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)).catch(() => {}))
   self.skipWaiting()
 })
 
@@ -18,26 +16,35 @@ self.addEventListener('activate', e => {
 })
 
 self.addEventListener('fetch', e => {
-  // Skip non-GET, API calls, WebSocket, cross-origin, and auth endpoints
-  if (e.request.method !== 'GET') return
-  if (e.request.url.includes('/api/')) return
-  if (e.request.url.includes('/ws')) return
-  if (!e.request.url.startsWith(self.location.origin)) return
+  const url = e.request.url
 
+  // Never intercept: non-GET, API, WebSocket, cross-origin
+  if (e.request.method !== 'GET') return
+  if (url.includes('/api/')) return
+  if (url.includes('/ws')) return
+  if (!url.startsWith(self.location.origin)) return
+
+  // Navigation requests (HTML pages) — always network-first, fallback to /index.html
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() =>
+        caches.match('/index.html').then(r => r || caches.match('/offline.html'))
+      )
+    )
+    return
+  }
+
+  // Static assets (JS/CSS/images) — cache-first
   e.respondWith(
     caches.match(e.request).then(cached => {
-      const networkFetch = fetch(e.request).then(res => {
+      if (cached) return cached
+      return fetch(e.request).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
-          const toCache = res.clone()
-          caches.open(CACHE).then(c => c.put(e.request, toCache))
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()))
         }
         return res
-      }).catch(() => cached || new Response('Offline', { status: 503, statusText: 'Service Unavailable' }))
-
-      return cached || networkFetch
-    }).catch(() =>
-      caches.match('/offline.html').then(r => r || new Response('Offline', { status: 503 }))
-    )
+      }).catch(() => new Response('', { status: 503 }))
+    })
   )
 })
 

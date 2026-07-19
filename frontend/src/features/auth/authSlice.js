@@ -3,7 +3,7 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 
 // Clear stale auth if app version changed (new JAR = new DB = old refresh tokens invalid)
-const APP_VERSION = '1.0.5'
+const APP_VERSION = '1.0.7'
 if (localStorage.getItem('app_version') !== APP_VERSION) {
   localStorage.removeItem('auth')
   localStorage.setItem('app_version', APP_VERSION)

@@ -323,7 +323,11 @@ export default function DeliveryDashboard() {
                   <p className="font-bold dark:text-white">Order #{d.orderId}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">📍 From: {d.restaurantName}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">🏠 To: {d.deliveryAddress}</p>
+                  {d.deliveryLat && d.deliveryLng && (
+                    <p className="text-xs text-blue-500 mt-0.5">📌 GPS location available</p>
+                  )}
                   <p className="text-primary font-semibold mt-1">₹{d.totalAmount} • Earn ₹30</p>
+                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full mt-1 inline-block">{d.status}</span>
                 </div>
                 <button onClick={() => acceptDelivery(d.orderId)} className="btn-primary text-sm px-3 py-1.5">
                   {t('accept')}

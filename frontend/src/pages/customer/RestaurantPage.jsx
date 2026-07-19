@@ -108,6 +108,7 @@ export default function RestaurantPage() {
   const dispatch  = useDispatch()
   const { current: restaurant, menu, reviews, loading } = useSelector(s => s.restaurant)
   const { user }  = useSelector(s => s.auth)
+  const isCustomer = user?.roles?.includes('ROLE_CUSTOMER')
   const cartItems = useSelector(s => s.cart.items)
   const [activeCategory, setActiveCategory] = useState(null)
   const [favorited, setFavorited]           = useState(false)

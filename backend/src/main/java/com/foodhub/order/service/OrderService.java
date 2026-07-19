@@ -207,16 +207,19 @@ public class OrderService {
                 Map.of("orderId", orderId, "latitude", lat, "longitude", lng));
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderResponse> getMyOrders(Long customerId, Pageable pageable) {
         return orderRepository.findByCustomerIdOrderByCreatedAtDesc(customerId, pageable)
                 .map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getRestaurantOrders(Long restaurantId) {
         return orderRepository.findByRestaurantIdOrderByCreatedAtDesc(restaurantId)
                 .stream().map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public OrderResponse getById(Long orderId) {
         return toResponse(orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found")));

@@ -18,6 +18,8 @@ public class DeliveryDto {
     private String restaurantName;
     private String restaurantAddress;
     private String deliveryAddress;
+    private Double deliveryLat;
+    private Double deliveryLng;
     private BigDecimal totalAmount;
     private String deliveryPhotoUrl;
 }

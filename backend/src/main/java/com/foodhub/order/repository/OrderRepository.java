@@ -17,6 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByRestaurantIdAndStatusOrderByCreatedAtDesc(Long restaurantId, OrderStatus status);
     List<Order> findByRestaurantIdOrderByCreatedAtDesc(Long restaurantId);
     List<Order> findByStatus(OrderStatus status);
+    List<Order> findByStatusIn(List<OrderStatus> statuses);
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.restaurant.id = :restaurantId AND o.createdAt > :since")
     int countByRestaurantIdAndCreatedAtAfter(@Param("restaurantId") Long restaurantId, @Param("since") LocalDateTime since);

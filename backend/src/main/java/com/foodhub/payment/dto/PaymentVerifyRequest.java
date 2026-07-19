@@ -6,8 +6,8 @@ import lombok.Data;
 
 @Data
 public class PaymentVerifyRequest {
-    @NotNull  private Long orderId;
+    private Long orderId;          // optional — looked up via razorpayOrderId
     @NotBlank private String razorpayOrderId;
-    @NotBlank private String razorpayPaymentId;
-    @NotBlank private String razorpaySignature;
+    private String razorpayPaymentId;   // nullable in simulate mode
+    private String razorpaySignature;   // nullable in simulate mode
 }

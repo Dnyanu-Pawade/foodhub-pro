@@ -38,6 +38,7 @@ export default function CartPage() {
   const [savedAddresses, setSavedAddresses] = useState([])
   const [gpsCoords, setGpsCoords]           = useState(null)
   const [gpsLoading, setGpsLoading]         = useState(false)
+  const [gpsHint,    setGpsHint]            = useState(null)
   const [surge, setSurge]                   = useState(null)
   const [alsoOrdered, setAlsoOrdered]       = useState([])
   const [splitCount, setSplitCount]         = useState(1)
@@ -91,8 +92,12 @@ export default function CartPage() {
   }
 
   const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) { toast.error('Enter a coupon code'); return }
     try {
-      const { data } = await api.post('/coupons/apply', { code: couponInput, orderAmount: subtotal })
+      const { data } = await api.post('/coupons/apply', {
+        code: couponInput,
+        orderAmount: subtotal > 0 ? subtotal : 1
+      })
       dispatch(applyCoupon({ code: data.code, discountAmount: data.discountAmount }))
       toast.success(data.message)
     } catch (err) {
@@ -122,32 +127,45 @@ export default function CartPage() {
   const shareLocation = () => {
     if (!navigator.geolocation) { toast.error('GPS not supported'); return }
     setGpsLoading(true)
+
+    const reverseGeocode = async (lat, lng) => {
+      setGpsCoords({ lat, lng })
+      checkDeliveryZone(lat, lng)
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=en`,
+          { headers: { 'User-Agent': 'FoodHubPro/1.0' } }
+        )
+        const d = await res.json()
+        const a = d.address || {}
+        const street = a.road || a.pedestrian || a.footway || a.path || a.street || ''
+        const houseNo = a.house_number ? `${a.house_number}, ` : ''
+        const area = a.suburb || a.neighbourhood || a.quarter || a.village || a.hamlet || ''
+        const city = a.city || a.town || a.municipality || a.county || ''
+        const state = a.state || ''
+        const pin = a.postcode || ''
+        const parts = [houseNo + street, area, city, state].filter(s => s.trim())
+        const composed = parts.join(', ') + (pin ? ` - ${pin}` : '')
+        // Show as HINT only — never overwrite user's address
+        setGpsHint(composed.length > 10 ? composed : d.display_name || null)
+      } catch {
+        setGpsHint(null)
+      }
+      toast.success('📍 GPS captured! Verify your address below.')
+      setGpsLoading(false)
+    }
+
     navigator.geolocation.getCurrentPosition(
-      async pos => {
-        const { latitude: lat, longitude: lng } = pos.coords
-        setGpsCoords({ lat, lng })
-        checkDeliveryZone(lat, lng)
-        try {
-          const r = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
-          )
-          const d = await r.json()
-          const a = d.address || {}
-          const parts = [
-            a.house_number, a.road || a.pedestrian,
-            a.suburb || a.neighbourhood || a.village,
-            a.city || a.town || a.county,
-            a.state, a.postcode
-          ].filter(Boolean)
-          if (parts.length) setAddress(parts.join(', '))
-          toast.success('📍 Real location detected!')
-        } catch {
-          toast.success('Location captured!')
-        }
-        setGpsLoading(false)
+      pos => reverseGeocode(pos.coords.latitude, pos.coords.longitude),
+      () => {
+        // Retry without high accuracy
+        navigator.geolocation.getCurrentPosition(
+          pos => reverseGeocode(pos.coords.latitude, pos.coords.longitude),
+          () => { toast.error('Location access denied. Please enter address manually.'); setGpsLoading(false) },
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+        )
       },
-      () => { toast.error('Could not get location'); setGpsLoading(false) },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
     )
   }
 
@@ -360,14 +378,31 @@ export default function CartPage() {
             {gpsLoading ? '⏳ Getting location...' : gpsCoords ? '✅ Location shared' : '📍 Share my location'}
           </button>
           {gpsCoords && (
-            <button type="button" onClick={() => setGpsCoords(null)}
+            <button type="button" onClick={() => { setGpsCoords(null); setGpsHint(null) }}
                     className="text-xs text-red-500 hover:underline">Remove</button>
           )}
         </div>
         {gpsCoords && (
-          <p className="text-xs text-gray-400 mt-1">
-            GPS: {gpsCoords.lat.toFixed(5)}, {gpsCoords.lng.toFixed(5)} — delivery partner will see your exact location
-          </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-xs text-green-600 font-medium">
+              ✅ GPS locked: {gpsCoords.lat.toFixed(5)}, {gpsCoords.lng.toFixed(5)}
+            </p>
+            {gpsHint && (
+              <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                <span className="text-blue-500 text-xs mt-0.5">📍</span>
+                <div className="flex-1">
+                  <p className="text-xs text-blue-700 font-medium">Detected nearby:</p>
+                  <p className="text-xs text-blue-600">{gpsHint}</p>
+                </div>
+                <button type="button"
+                        onClick={() => { setAddress(gpsHint); setGpsHint(null) }}
+                        className="text-xs bg-blue-600 text-white px-2 py-1 rounded-md whitespace-nowrap flex-shrink-0">
+                  Use this
+                </button>
+              </div>
+            )}
+            <p className="text-xs text-gray-400">✏️ Edit the address above to your exact location</p>
+          </div>
         )}
       </div>
 
