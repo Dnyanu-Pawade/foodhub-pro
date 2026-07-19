@@ -31,7 +31,7 @@ public class MenuService {
     @Transactional(readOnly = true)
     public List<MenuItemDto> getMenu(Long restaurantId) {
         return menuItemRepository
-                .findByRestaurantIdAndIsAvailableTrueAndDeletedAtIsNull(restaurantId)
+                .findByRestaurantIdAndAvailableTrueAndDeletedAtIsNull(restaurantId)
                 .stream().map(this::toDto).toList();
     }
 
@@ -94,7 +94,7 @@ public class MenuService {
         addon.setGroupName(dto.getGroupName());
         addon.setName(dto.getName());
         addon.setExtraPrice(dto.getExtraPrice());
-        addon.setDefault(dto.isDefault());
+        addon.setDefaultOption(dto.isDefaultOption());
         return addonToDto(itemAddonRepository.save(addon));
     }
 
@@ -152,7 +152,7 @@ public class MenuService {
         dto.setGroupName(a.getGroupName());
         dto.setName(a.getName());
         dto.setExtraPrice(a.getExtraPrice());
-        dto.setDefault(a.isDefault());
+        dto.setDefaultOption(a.isDefaultOption());
         return dto;
     }
 }

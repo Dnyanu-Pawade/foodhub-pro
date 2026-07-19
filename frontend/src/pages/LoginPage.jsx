@@ -146,6 +146,9 @@ export default function LoginPage() {
             <button type="submit" disabled={loading} className="btn-primary w-full">
               {loading ? t('loading') : t('login')}
             </button>
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">Forgot password?</Link>
+            </div>
           </form>
         )}
 

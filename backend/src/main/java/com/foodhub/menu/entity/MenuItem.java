@@ -35,8 +35,8 @@ public class MenuItem {
     private String category;
     private String imageUrl;
 
-    private boolean isVeg = true;
-    private boolean isAvailable = true;
+    private boolean veg = true;
+    private boolean available = true;
 
     private LocalDateTime deletedAt;
 

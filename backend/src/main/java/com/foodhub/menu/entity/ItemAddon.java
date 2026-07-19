@@ -21,13 +21,13 @@ public class ItemAddon {
     private MenuItem menuItem;
 
     @Column(nullable = false)
-    private String groupName; // e.g. "Size", "Extras", "Spice Level"
+    private String groupName;
 
     @Column(nullable = false)
-    private String name;     // e.g. "Large", "Extra Cheese"
+    private String name;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal extraPrice = BigDecimal.ZERO;
 
-    private boolean isDefault = false;
+    private boolean defaultOption = false;
 }

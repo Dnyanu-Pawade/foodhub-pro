@@ -59,6 +59,33 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse(true, "Logged out successfully"));
     }
 
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Send password reset OTP to email")
+    public ResponseEntity<ApiResponse> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user != null) {
+            String otp = otpService.generateOtp("reset_" + email);
+            emailService.sendOtp(email, otp);
+        }
+        return ResponseEntity.ok(new ApiResponse(true, "If this email exists, a reset OTP has been sent"));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Reset password using OTP")
+    public ResponseEntity<ApiResponse> resetPassword(@RequestBody Map<String, String> body) {
+        String email    = body.get("email");
+        String otp      = body.get("otp");
+        String password = body.get("password");
+        if (!otpService.verifyOtp("reset_" + email, otp))
+            throw new com.foodhub.common.exception.BadRequestException("Invalid or expired OTP");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new com.foodhub.common.exception.ResourceNotFoundException("User not found"));
+        user.setPassword(authService.encodePassword(password));
+        userRepository.save(user);
+        return ResponseEntity.ok(new ApiResponse(true, "Password reset successfully"));
+    }
+
     @PostMapping("/otp/send")
     @Operation(summary = "Send OTP to phone or email")
     public ResponseEntity<ApiResponse> sendOtp(@RequestBody Map<String, String> body) {

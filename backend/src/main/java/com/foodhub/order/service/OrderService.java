@@ -55,9 +55,9 @@ public class OrderService {
 
     static {
         TRANSITIONS = new EnumMap<>(OrderStatus.class);
-        TRANSITIONS.put(OrderStatus.PLACED,           Set.of(OrderStatus.CONFIRMED, OrderStatus.REJECTED));
+        TRANSITIONS.put(OrderStatus.PLACED,           Set.of(OrderStatus.CONFIRMED, OrderStatus.REJECTED, OrderStatus.CANCELLED));
         TRANSITIONS.put(OrderStatus.CONFIRMED,        Set.of(OrderStatus.PREPARING, OrderStatus.CANCELLED));
-        TRANSITIONS.put(OrderStatus.PREPARING,        Set.of(OrderStatus.READY_FOR_PICKUP));
+        TRANSITIONS.put(OrderStatus.PREPARING,        Set.of(OrderStatus.READY_FOR_PICKUP, OrderStatus.CANCELLED));
         TRANSITIONS.put(OrderStatus.READY_FOR_PICKUP, Set.of(OrderStatus.PICKED_UP));
         TRANSITIONS.put(OrderStatus.PICKED_UP,        Set.of(OrderStatus.DELIVERED));
         TRANSITIONS.put(OrderStatus.REJECTED,         Set.of());

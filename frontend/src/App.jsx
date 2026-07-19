@@ -77,6 +77,7 @@ import AiChatbot           from '@/components/AiChatbot'
 import FloatingCart        from '@/components/ui/FloatingCart'
 import BottomNav           from '@/components/ui/BottomNav'
 
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
 import QrOrderPage   from '@/pages/QrOrderPage'
 import NotFoundPage  from '@/pages/NotFoundPage'
 import TermsPage     from '@/pages/TermsPage'
@@ -118,6 +119,7 @@ export default function App() {
         <Route path="/search"         element={<SearchPage />} />
         <Route path="/restaurant/:id" element={<RestaurantPage />} />
         <Route path="/landing"        element={<LandingPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Customer */}
         <Route path="/"                   element={PR(['ROLE_CUSTOMER'], HomePage)} />

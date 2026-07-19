@@ -19,19 +19,18 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     // Open or close all approved active restaurants
     @Modifying
-    @Query("UPDATE Restaurant r SET r.isOpen = :open WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL")
+    @Query("UPDATE Restaurant r SET r.open = :open WHERE r.status = 'APPROVED' AND r.active = true AND r.deletedAt IS NULL")
     int setAllOpen(@Param("open") boolean open);
 
-    // Keep old methods for compatibility but they won't be called
     @Modifying
-    @Query("UPDATE Restaurant r SET r.isOpen = true WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL AND r.openTime IS NOT NULL AND r.closeTime IS NOT NULL AND r.openTime <= :now AND r.closeTime > :now AND r.isOpen = false")
+    @Query("UPDATE Restaurant r SET r.open = true WHERE r.status = 'APPROVED' AND r.active = true AND r.deletedAt IS NULL AND r.openTime IS NOT NULL AND r.closeTime IS NOT NULL AND r.openTime <= :now AND r.closeTime > :now AND r.open = false")
     int openByTime(@Param("now") java.time.LocalTime now);
 
     @Modifying
-    @Query("UPDATE Restaurant r SET r.isOpen = false WHERE r.status = 'APPROVED' AND r.isActive = true AND r.deletedAt IS NULL AND r.openTime IS NOT NULL AND r.closeTime IS NOT NULL AND (r.closeTime <= :now OR r.openTime > :now) AND r.isOpen = true")
+    @Query("UPDATE Restaurant r SET r.open = false WHERE r.status = 'APPROVED' AND r.active = true AND r.deletedAt IS NULL AND r.openTime IS NOT NULL AND r.closeTime IS NOT NULL AND (r.closeTime <= :now OR r.openTime > :now) AND r.open = true")
     int closeByTime(@Param("now") java.time.LocalTime now);
 
-    Page<Restaurant> findByStatusAndIsActiveTrue(RestaurantStatus status, Pageable pageable);
+    Page<Restaurant> findByStatusAndActiveTrue(RestaurantStatus status, Pageable pageable);
     long countByStatus(RestaurantStatus status);
 
     @Query("""
@@ -43,10 +42,10 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         AND (:search IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :search, '%'))
              OR LOWER(r.cuisineType) LIKE LOWER(CONCAT('%', :search, '%')))
         AND (:vegOnly IS NULL OR :vegOnly = false OR EXISTS (
-             SELECT 1 FROM MenuItem m WHERE m.restaurant = r AND m.isVeg = true AND m.deletedAt IS NULL))
+             SELECT 1 FROM MenuItem m WHERE m.restaurant = r AND m.veg = true AND m.deletedAt IS NULL))
         AND (:maxDeliveryFee IS NULL OR r.deliveryFee <= :maxDeliveryFee)
         AND (:minRating IS NULL OR r.avgRating >= :minRating)
-        AND (:openNow IS NULL OR :openNow = false OR r.isOpen = true)
+        AND (:openNow IS NULL OR :openNow = false OR r.open = true)
         ORDER BY
           CASE WHEN :sortBy = 'rating' THEN r.avgRating END DESC,
           CASE WHEN :sortBy = 'delivery_time' THEN r.avgDeliveryTimeMinutes END ASC,
@@ -69,6 +68,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     Optional<Restaurant> findByIdAndDeletedAtIsNull(Long id);
 
-    @Query("SELECT DISTINCT r.city FROM Restaurant r WHERE r.status = 'APPROVED' AND r.isActive = true AND r.city IS NOT NULL ORDER BY r.city")
+    @Query("SELECT DISTINCT r.city FROM Restaurant r WHERE r.status = 'APPROVED' AND r.active = true AND r.city IS NOT NULL ORDER BY r.city")
     List<String> findDistinctCities();
 }

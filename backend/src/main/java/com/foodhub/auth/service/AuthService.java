@@ -127,6 +127,10 @@ public class AuthService {
                 user.getUsername(), user.getEmail(), user.getFullName(), user.getPhone(), roles);
     }
 
+    public String encodePassword(String raw) {
+        return passwordEncoder.encode(raw);
+    }
+
     private Role resolveRole(String roleName) {
         ERole eRole = switch (roleName == null ? "" : roleName.toLowerCase()) {
             case "restaurant_owner" -> ERole.ROLE_RESTAURANT_OWNER;

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import api from '@/services/api'
 import { FiSearch, FiX, FiClock, FiFilter } from 'react-icons/fi'
+import toast from 'react-hot-toast'
 
 const RECENT_KEY = 'foodhub_recent_searches'
 const TRENDING = ['Biryani', 'Pizza', 'Burger', 'Paneer', 'Noodles', 'Dosa', 'Rolls', 'Thali']
@@ -42,6 +43,8 @@ export default function SearchPage() {
   const [activeFilters, setActiveFilters] = useState(new Set())
   const [cuisineFilter, setCuisineFilter] = useState('')
   const [showFilters,   setShowFilters]   = useState(false)
+  const [nearMe,        setNearMe]        = useState(false)
+  const [nearMeLoading, setNearMeLoading] = useState(false)
   const inputRef    = useRef(null)
   const debounceRef = useRef(null)
 
@@ -63,6 +66,29 @@ export default function SearchPage() {
         setSuggestions(data)
       } catch {}
     }, 250)
+  }
+
+  const doNearMe = () => {
+    if (!navigator.geolocation) { toast.error('GPS not supported'); return }
+    setNearMeLoading(true)
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const { latitude: lat, longitude: lng } = pos.coords
+        setNearMe(true)
+        setLoading(true)
+        try {
+          const { data } = await api.get(`/restaurants?lat=${lat}&lng=${lng}&radius=10&size=20`)
+          setResults(data.content || [])
+          setQuery('')
+          toast.success('📍 Showing restaurants near you!')
+        } catch {
+          toast.error('Could not load nearby restaurants')
+        } finally { setLoading(false) }
+        setNearMeLoading(false)
+      },
+      () => { toast.error('Location access denied'); setNearMeLoading(false) },
+      { enableHighAccuracy: true, timeout: 8000 }
+    )
   }
 
   const doSearch = async (q = query) => {
@@ -139,6 +165,15 @@ export default function SearchPage() {
           </div>
         )}
       </div>
+
+      {/* Near Me button */}
+      <button onClick={doNearMe} disabled={nearMeLoading}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors mb-4
+                ${nearMe ? 'bg-primary text-white border-primary' : 'border-gray-300 text-gray-600 dark:text-gray-300 dark:border-gray-600 hover:border-primary hover:text-primary'}`}>
+        {nearMeLoading ? '⏳' : '📍'} {nearMeLoading ? 'Getting location...' : nearMe ? 'Showing Near You' : 'Near Me'}
+        {nearMe && <button type="button" onClick={e => { e.stopPropagation(); setNearMe(false); setResults([]) }}
+                           className="ml-1 text-white/80 hover:text-white">✕</button>}
+      </button>
 
       {/* Tabs + Filter button */}
       <div className="flex gap-2 mb-4 items-center">

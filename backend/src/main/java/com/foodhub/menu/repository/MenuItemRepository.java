@@ -11,12 +11,12 @@ import java.util.Optional;
 
 public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
     List<MenuItem> findByRestaurantIdAndDeletedAtIsNull(Long restaurantId);
-    List<MenuItem> findByRestaurantIdAndIsAvailableTrueAndDeletedAtIsNull(Long restaurantId);
+    List<MenuItem> findByRestaurantIdAndAvailableTrueAndDeletedAtIsNull(Long restaurantId);
     Optional<MenuItem> findByIdAndDeletedAtIsNull(Long id);
 
     @Query("""
         SELECT m FROM MenuItem m
-        WHERE m.deletedAt IS NULL AND m.isAvailable = true
+        WHERE m.deletedAt IS NULL AND m.available = true
         AND m.restaurant.status = 'APPROVED'
         AND (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%',:q,'%'))
              OR LOWER(m.category) LIKE LOWER(CONCAT('%',:q,'%')))
@@ -26,7 +26,7 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
 
     @Query("""
         SELECT DISTINCT m.name FROM MenuItem m
-        WHERE m.deletedAt IS NULL AND m.isAvailable = true
+        WHERE m.deletedAt IS NULL AND m.available = true
         AND LOWER(m.name) LIKE LOWER(CONCAT('%',:q,'%'))
         ORDER BY m.name ASC
         LIMIT 8

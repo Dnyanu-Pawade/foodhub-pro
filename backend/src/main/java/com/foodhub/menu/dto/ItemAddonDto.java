@@ -9,5 +9,5 @@ public class ItemAddonDto {
     private String groupName;
     private String name;
     private BigDecimal extraPrice;
-    private boolean isDefault;
+    private boolean defaultOption;
 }

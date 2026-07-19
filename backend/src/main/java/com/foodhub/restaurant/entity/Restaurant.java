@@ -59,9 +59,9 @@ public class Restaurant {
     @Enumerated(EnumType.STRING)
     private RestaurantStatus status = RestaurantStatus.PENDING_APPROVAL;
 
-    private boolean isActive = true;
-    private boolean isOpen = true;
-    private boolean isPromoted = false;
+    private boolean active = true;
+    private boolean open = true;
+    private boolean promoted = false;
     private LocalDateTime promotedUntil;
     private LocalDateTime deletedAt;
     private Double commissionRate = 15.0;

@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/index.html", "/assets/**", "/favicon.svg",
                                  "/manifest.json", "/sw.js").permitAll()
                 // React Router
-                .requestMatchers("/login", "/register", "/search", "/restaurant/**", "/cart",
+                .requestMatchers("/login", "/register", "/forgot-password", "/search", "/restaurant/**", "/cart",
                                  "/orders/**", "/wallet", "/favorites", "/profile",
                                  "/addresses", "/notifications", "/loyalty",
                                  "/owner/**", "/admin", "/admin/**",
@@ -75,6 +75,7 @@ public class SecurityConfig {
                                  "/qr-order", "/order").permitAll()
                 // Public API
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 .requestMatchers("/ws/**").permitAll()

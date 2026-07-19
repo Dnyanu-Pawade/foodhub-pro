@@ -45,7 +45,7 @@ public class User {
 
     private String profileImageUrl;
     private String referralCode;
-    private boolean isActive = true;
+    private boolean active = true;
     private boolean enabled = true;
     private String staffRole;       // CHEF, CASHIER, MANAGER
     private Long restaurantId;      // for staff members
