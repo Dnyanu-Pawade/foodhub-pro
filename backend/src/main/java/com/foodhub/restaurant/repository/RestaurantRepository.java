@@ -35,7 +35,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     @Query("""
         SELECT r FROM Restaurant r
-        WHERE r.status = 'APPROVED' AND r.isActive = true
+        WHERE r.status = 'APPROVED' AND r.active = true
         AND r.deletedAt IS NULL
         AND (:city IS NULL OR LOWER(r.city) = LOWER(:city))
         AND (:storeType IS NULL OR r.storeType = :storeType)

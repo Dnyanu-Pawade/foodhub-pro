@@ -19,9 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhone(String phone);
     Page<User> findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
             String username, String email, Pageable pageable);
-    long countByIsActiveTrue();
+    long countByActiveTrue();
     Optional<User> findByReferralCode(String referralCode);
 
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName AND u.isActive = true")
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName AND u.active = true")
     List<User> findByRoleName(@Param("roleName") String roleName);
 }

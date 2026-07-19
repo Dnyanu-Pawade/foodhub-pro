@@ -143,8 +143,16 @@ public class OrderService {
         order.setDiscount(BigDecimal.ZERO);
         order.setTotalAmount(subtotal.add(deliveryFee));
 
-        Order saved = orderRepository.save(order);
-        messagingTemplate.convertAndSend("/topic/restaurant/" + restaurant.getId() + "/orders", toResponse(saved));
+        Order saved = orderRepository.saveAndFlush(order);
+        OrderResponse savedResponse = toResponse(saved);
+        Long restaurantId = restaurant.getId();
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronizationAdapter() {
+                @Override public void afterCommit() {
+                    messagingTemplate.convertAndSend("/topic/restaurant/" + restaurantId + "/orders", savedResponse);
+                }
+            }
+        );
         emailService.sendOrderConfirmation(customer.getEmail(), customer.getFullName(),
                 saved.getId(), restaurant.getName(), saved.getTotalAmount().toPlainString());
         notificationService.sendOrderConfirmation(customer.getPhone(), customer.getFullName(),

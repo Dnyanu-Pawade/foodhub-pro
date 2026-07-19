@@ -34,16 +34,20 @@ self.addEventListener('fetch', e => {
     return
   }
 
+  // Only cache actual static assets (files with extensions)
+  if (!/\.\w+$/.test(new URL(url).pathname)) return
+
   // Static assets (JS/CSS/images) — cache-first
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached
       return fetch(e.request).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
-          caches.open(CACHE).then(c => c.put(e.request, res.clone()))
+          const clone = res.clone()
+          caches.open(CACHE).then(c => c.put(e.request, clone))
         }
         return res
-      }).catch(() => new Response('', { status: 503 }))
+      }).catch(() => new Response('', { status: 404 }))
     })
   )
 })

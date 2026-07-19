@@ -30,6 +30,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType type = NotificationType.INFO;
 
+    @Column(name = "is_read")
     private boolean read = false;
     private String actionUrl;
     private Long referenceId;
